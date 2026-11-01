@@ -178,7 +178,11 @@ def test_gsc_keeps_queries_the_earlier_window_never_saw():
               {"query": "hyperframes skill", "page": "/b", "impressions": 3, "clicks": 0},
               {"query": "ppt skill", "page": "/c", "impressions": 90, "clicks": 9}]
     fresh = gsc.fresh_queries(recent, [{"query": "ppt skill"}])
-    assert fresh == [{"query": "hyperframes skill", "impressions": 7, "clicks": 1, "page": "/a"}]
+    assert len(fresh) == 1
+    assert fresh[0]["query"] == "hyperframes skill"
+    assert fresh[0]["impressions"] == 7
+    assert fresh[0]["page"] == "/a"
+    assert [p["page"] for p in fresh[0]["pages"]] == ["/a", "/b"]
 
 
 def test_gsc_is_off_without_a_site(cfg):

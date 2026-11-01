@@ -9,3 +9,6 @@ __pycache__/
 .pytest_cache/
 .venv/
 .env
+.secrets/
+gsc-report*.json
+gsc-report*.md

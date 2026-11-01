@@ -1,0 +1,44 @@
+name: GSC read-only check and discovery
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gsc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Configure verified property
+        env:
+          GSC_SITE: ${{ vars.GSC_SITE }}
+          GSC_TOKEN_JSON: ${{ secrets.GSC_TOKEN_JSON }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          if not os.environ.get('GSC_SITE') or not os.environ.get('GSC_TOKEN_JSON'):
+              raise SystemExit('Set GSC_SITE to the verified property and GSC_TOKEN_JSON as an Actions secret first')
+          cfg = json.loads(Path('config.meme.example.json').read_text())
+          cfg['gsc']['site'] = os.environ['GSC_SITE']
+          Path('config.json').write_text(json.dumps(cfg))
+          PY
+      - name: Verify and collect GSC data
+        env:
+          GSC_TOKEN_JSON: ${{ secrets.GSC_TOKEN_JSON }}
+        run: |
+          python -m radar.gsc --check
+          python -m radar.gsc --out gsc-report.json
+      # Search queries can contain private information. Deliberately do not print
+      # them to logs or publish a step summary. Retain only the report briefly.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gsc-report-${{ github.run_id }}
+          path: gsc-report.json
+          retention-days: 7
