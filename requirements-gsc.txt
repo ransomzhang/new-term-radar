@@ -1,0 +1,2 @@
+# Only needed on the user's computer for interactive, read-only OAuth consent.
+google-auth-oauthlib>=1.2,<2

@@ -29,7 +29,7 @@
 | ② GitHub 爆发 | 创建不到 14 天、平均每天涨 200 星以上，或比昨天多 400 星的仓库；附带大家实际会搜的写法（「niko strata」） | 无（有 GitHub token 限额更高） | 免费 |
 | ③ 竞品 sitemap | 某个站新增的几个网址共用、而它的旧网址里很少出现的词 | 你列出的 sitemap | 免费 |
 | ③ 新站 | 近 90 天注册且首次被收录、已经有 20 个以上排名词的域名 | AIsa key | 每个查询约 $0.13，每周一次 |
-| ④ Search Console | 你的站第一次获得曝光的查询词（用新鲜数据） | 你自己的 Google 授权 | 免费 |
+| ④ Search Console | 最近 3 天有曝光、此前 60 天返回数据未见的查询词（默认已完成处理数据） | 你自己的 Google 授权 | 免费 |
 | ⑤ 复盘 | 每条线索 14 天后去 Google Trends 核对，和它自己的基线比；按信号统计命中率和提前天数 | AIsa key | 每个搜索写法 $0.0012 |
 | 新词表 | 针对当天的新名字:找出它背后的通用搜索词(大家拿这个新东西做什么),逐个估算规模并给出决策 | AIsa key；GoAnyAPI key 可选 | 5 个名字约每天 $0.15，加上 GoAnyAPI 约 $0.22 |
 | 名字判断 | 小模型给每个词打分：是某个具体东西的名字，还是普通词？ | AIsa key | 每次不到一美分 |
@@ -153,11 +153,11 @@ python -m radar daily --skip x,hf --out report.md  # 其余全部，每天一次
 ### Search Console（可选）
 
 ```bash
-pip install google-auth-oauthlib
-python scripts/gsc_auth.py gsc_client.json   # 打开一次浏览器授权，写出 gsc_token.json
+pip install -r requirements-gsc.txt
+python scripts/gsc_auth.py .secrets/gsc_client.json --config config.json
 ```
 
-`gsc_client.json` 是 Google Cloud Console 里类型为「桌面应用」的 OAuth 客户端，所在项目要启用 Search Console API。然后设置 `"gsc": {"site": "sc-domain:你的域名"}`。授权是只读的，凭证只留在你自己的机器上，`.gitignore` 已经把它排除了。
+`gsc_client.json` 是 Google Cloud Console 里类型为「桌面应用」的 OAuth 客户端，所在项目要启用 Search Console API。脚本会从账号可访问的属性中选择覆盖目标 URL 的真实属性，自动更新本地配置，并把只读凭据保存到 `.secrets/gsc_token.json`。通过 `--target https://你的站点/` 指定其他目标。凭据和本地配置均不提交。
 
 ### 邮件（可选）
 
@@ -203,3 +203,7 @@ python -m pytest -q tests
 ## 许可
 
 MIT。这套雷达提取自 [agentskillshub.top](https://agentskillshub.top) 背后每天在跑的版本。
+
+### meme.ransomz.dev 的只读 GSC 接入
+
+参见 [站点核验、授权、独立采集及关键词研究流程](docs/gsc-meme.zh-CN.md)。新增命令 `python -m radar.gsc --check`、`python -m radar.gsc --out gsc-report.json`；授权时从真实可访问属性中选择，不预设属性名。默认使用 finalized 数据，导出全部达标新词、全部落地页和逐日曝光。配置模板为 `config.meme.example.json`，凭据只保存在本地忽略目录或 Actions Secret。

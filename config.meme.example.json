@@ -1,0 +1,8 @@
+{
+  "lang": "zh",
+  "gsc": {
+    "target_url": "https://meme.ransomz.dev/",
+    "token_file": ".secrets/gsc_token.json",
+    "fresh": false
+  }
+}

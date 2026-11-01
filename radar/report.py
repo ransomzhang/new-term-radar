@@ -110,11 +110,17 @@ def _gsc_lines(gsc: dict) -> list[str]:
     if gsc.get("off"):
         return []
     lines = ["", t("gsc_h"), ""]
+    if gsc.get("site"):
+        lines += [t("gsc_meta", site=gsc["site"], state=gsc["data_state"]), ""]
     if not gsc.get("queries"):
         return lines + [t("recent_none", why=_state(gsc, t("gsc_none")))]
     lines += [t("gsc_intro", window=gsc["window"], total=gsc["total_new"], min=gsc["min_impressions"]), "",
               t("gsc_cols"), "|---|---|---|---|"]
-    return lines + [f"| {_cell(q['query'])} | {q['impressions']} | {q['clicks']} | {q['page']} |" for q in gsc["queries"]]
+    for q in gsc["queries"]:
+        pages = q.get("pages", [{"page": q["page"]}])
+        landing = _cell(", ".join(p["page"] for p in pages))
+        lines.append(f"| {_cell(q['query'])} | {q['impressions']} | {q['clicks']} | {landing} |")
+    return lines
 
 
 def _review_lines(cfg: dict, rev: dict, summ: dict) -> list[str]:

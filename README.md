@@ -45,7 +45,7 @@ flowchart LR
 | ② GitHub breakout | A repo under 14 days old averaging 200+ stars a day, or +400 since yesterday; adds the search variants people use ("niko strata") | nothing (a GitHub token raises the rate limit) | free |
 | ③ Sitemaps | Words that several new URLs on a site share and its older URLs rarely carried | the sitemaps you list | free |
 | ③ New sites | Domains registered and first indexed in the last 90 days that already rank for 20+ keywords | AIsa key | about $0.13 per query, weekly |
-| ④ Search Console | Queries your site got impressions for, for the first time (fresh data) | your own Google token | free |
+| ④ Search Console | Queries with impressions in 3 days, absent from the preceding 60 days of returned data (finalized by default) | your own Google token | free |
 | ⑤ Review | Each lead checked in Google Trends 14 days later, against its own baseline; hit rate and days ahead per signal | AIsa key | $0.0012 per search variant |
 | Keyword table | For the day's new names: the generic search terms behind them (what people do with the new thing), each sized and given a decision | AIsa key; GoAnyAPI key optional | about $0.15 a day for 5 names, $0.22 with GoAnyAPI |
 | Name judge | A small model scores every term: the name of one specific thing, or a common word? | AIsa key | a fraction of a cent per run |
@@ -176,11 +176,11 @@ Please read each site's robots.txt before you add its sitemap, and keep `pause` 
 ### Search Console (optional)
 
 ```bash
-pip install google-auth-oauthlib
-python scripts/gsc_auth.py gsc_client.json   # opens a browser once, writes gsc_token.json
+pip install -r requirements-gsc.txt
+python scripts/gsc_auth.py .secrets/gsc_client.json --config config.json --target https://your-site.com/
 ```
 
-`gsc_client.json` is an OAuth client of type "Desktop app" from Google Cloud Console, in a project with the Search Console API enabled. Then set `"gsc": {"site": "sc-domain:your-site.com"}`. The token is read-only and stays on your machine; `.gitignore` already lists it.
+`gsc_client.json` is an OAuth client of type "Desktop app" from Google Cloud Console, in a project with the Search Console API enabled. The script selects an actual accessible property covering the target, updates the local config, and writes a read-only token to `.secrets/gsc_token.json`. Neither credentials nor local config are committed. Use `python -m radar.gsc --check` to verify, then `python -m radar.gsc --out gsc-report.json` to collect data. See [the detailed GSC runbook](docs/gsc-meme.zh-CN.md) for the meme.ransomz.dev setup and a manual Actions workflow.
 
 ### Mail (optional)
 
